@@ -1,0 +1,1310 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+
+const C = {
+  verde: "#008D36",
+  rojo: "#E20413",
+  amarillo: "#FFDD00",
+  gris: "#575756",
+  grisClaro: "#F0F0F0",
+  grisMedio: "#D6D6D6",
+  verdeClaro: "#79B600",
+  blanco: "#FFFFFF",
+};
+
+const categorias = [
+  { id: 1, nombre: "Frases de cajón y humor nostálgico", subtitulo: "Entre risas y complicidad", color: C.verde, icono: "ti-message-2" },
+  { id: 2, nombre: "Primeras veces y el inicio del viaje", subtitulo: "Los recuerdos del inicio", color: C.rojo, icono: "ti-seedling" },
+  { id: 3, nombre: "Ver los frutos y el orgullo de madre", subtitulo: "Proyección, legado y resultados", color: C.verdeClaro, icono: "ti-award" },
+  { id: 4, nombre: "El lado real: Desafíos y resiliencia", subtitulo: "Empatía desde la maternidad real", color: C.gris, icono: "ti-shield-heart" },
+  { id: 5, nombre: "Corazón de madre y amor incondicional", subtitulo: "Conexión emocional profunda", color: "#C0392B", icono: "ti-heart" },
+];
+
+const tarjetas = [
+  { id: 1, cat: 1, titulo: "El superpoder del orden", texto: "Cuéntanos la primera vez que tuviste que usar el superpoder de 'Y si yo lo encuentro, ¿qué te hago?' con tus hijos y efectivamente encontraste lo 'invisible'." },
+  { id: 2, cat: 1, titulo: "La profecía cumplida", texto: "¿Cuál fue el primer momento de tu maternidad en el que pensaste: '¡Te entiendo tanto, mamá!' recordando aquello de 'Cuando tengas tus hijos me vas a entender'?" },
+  { id: 3, cat: 1, titulo: "El radar meteorológico", texto: "¿Cuál es tu frase más 'de mamá' y en qué momento te descubriste repitiéndola por primera vez, aunque antes dijiste que nunca la dirías?" },
+  { id: 4, cat: 1, titulo: "El drama justificado", texto: "¿Cuál es esa pequeña exageración dramática que has usado para que colaboren en casa? ¿Funcionó?" },
+  { id: 5, cat: 1, titulo: "Detective de mentiras", texto: "¿Cuál ha sido la mentira más inocente, graciosa o peor armada que te intentó decir tu hijo y tuviste que aguantar la risa?" },
+  { id: 6, cat: 1, titulo: "El misterio del calcetín", texto: "Cuéntanos una travesura de tus hijos que te hizo renegar muchísimo en su momento, pero que hoy la recuerdas y te mata de la risa." },
+  { id: 7, cat: 1, titulo: "El grito de guerra", texto: "Cuéntanos ese momento en que sacaste tu voz más firme y autoritaria como mamá — ¿cómo reaccionaron tus hijos y qué cara pusieron?" },
+  { id: 8, cat: 1, titulo: "Ley de vida", texto: "¿Cómo manejas ese delicado equilibrio entre poner límites firmes y darles alas para que vuelen?" },
+  { id: 9, cat: 1, titulo: "Blooper de madre", texto: "Comparte un descuido divertido o confusión graciosa que hayas tenido como mamá y que hoy sea el chiste oficial de las reuniones familiares." },
+  { id: 10, cat: 1, titulo: "El veredicto", texto: "Completa la frase con honestidad: 'Ser mamá es el único trabajo del mundo donde...'" },
+  { id: 11, cat: 2, titulo: "El primer sonido", texto: "Recuerda el instante exacto en que escuchaste el primer llanto de tu primer hijo al nacer. ¿Qué fue lo primero que cruzó por tu mente?" },
+  { id: 12, cat: 2, titulo: "El manual inexistente", texto: "Esa primera noche en casa con tu bebé, sin manual, sin instructivo — ¿qué fue lo primero que hiciste o dijiste cuando te quedaste sola con él y te diste cuenta de que eras tú la experta?" },
+  { id: 13, cat: 2, titulo: "El primer gran logro", texto: "¿Cómo viviste sus primeros pasos o su primera palabra? ¿Te acuerdas si fue 'mamá', 'papá' o algo inesperado?" },
+  { id: 14, cat: 2, titulo: "La puerta del colegio", texto: "El primer día de clases... ¿Quién lloró más en la puerta del colegio, tu hijo o tú? Cuéntanos esa experiencia." },
+  { id: 15, cat: 2, titulo: "El desvelo original", texto: "La primera enfermedad o fiebre alta de tu hijo. ¿Cómo manejaste esa noche de desvelo que te inauguró como la enfermera oficial de la casa?" },
+  { id: 16, cat: 2, titulo: "Palabras mágicas", texto: "Describe el contexto y lo que sintió tu corazón la primera vez que tu hijo te miró y te dijo 'Te amo, mamá' con total conciencia." },
+  { id: 17, cat: 2, titulo: "La casa en silencio", texto: "Cuando tu hijo se fue a su primer viaje, campamento o pijamada — ¿qué hiciste con esas primeras horas de silencio? ¿Las disfrutaste, las llenaste de algo o terminaste extrañándolo más rápido de lo que esperabas?" },
+  { id: 18, cat: 2, titulo: "Grado de experta", texto: "Ese momento exacto en el que supiste qué le pasaba a tu hijo con solo escuchar la vibración de su llanto o mirar sus ojos." },
+  { id: 19, cat: 2, titulo: "Recalculando", texto: "¿Cuál fue la primera pregunta difícil o existencial que te hizo tu hijo y te dejó sin saber qué responder en el momento?" },
+  { id: 20, cat: 2, titulo: "Viaje al pasado", texto: "Si pudieras volver a abrazar a la versión de ti misma del primer día que te convertiste en mamá, ¿qué consejo de paz le darías?" },
+  { id: 21, cat: 3, titulo: "El espejo del alma", texto: "¿Cuándo fue la primera vez que viste a tu hijo reaccionar o hablar exactamente igual que tú y dijiste: 'Es mi vivo retrato'?" },
+  { id: 22, cat: 3, titulo: "Cosechando valores", texto: "Comparte un momento en el que viste a tu hijo ser empático, solidario o educado con otra persona sin que tú se lo pidieras." },
+  { id: 23, cat: 3, titulo: "Orgullo silencioso", texto: "Un logro de tu hijo (no tiene que ser académico o deportivo, puede ser personal) que te haya hecho inflar el pecho de orgullo en silencio." },
+  { id: 24, cat: 3, titulo: "Frutos del esfuerzo", texto: "¿En qué meta, talento o sueño cumplido de tu hijo sentiste que cada uno de tus sacrificios valió la pena al 100%?" },
+  { id: 25, cat: 3, titulo: "El alumno supera al maestro", texto: "¿Qué gran lección de vida, de paciencia o de amor te ha dado tu hijo a ti, convirtiéndose él en tu maestro?" },
+  { id: 26, cat: 3, titulo: "De dependientes a cómplices", texto: "¿Cómo describirías el momento en que tu relación con tu hijo pasó de ser de cuidado absoluto a convertirse en una gran amistad y complicidad?" },
+  { id: 27, cat: 3, titulo: "El mejor cumplido", texto: "¿Cuál ha sido el halago, la palabra de agradecimiento o el detalle de tu hijo que guardas en tu memoria como tu mayor tesoro?" },
+  { id: 28, cat: 3, titulo: "Resiliencia pura", texto: "Cuéntanos un momento difícil que tu hijo logró superar por sí mismo y donde admiraste profundamente su madurez y fortaleza." },
+  { id: 29, cat: 3, titulo: "En una palabra", texto: "Si tuvieras que definir la mayor virtud o el talento más grande de tu hijo en una sola palabra, ¿cuál sería y por qué?" },
+  { id: 30, cat: 3, titulo: "El instinto protector", texto: "¿Cómo te hace sentir ver reflejado en tus hijos tu propio instinto de cuidado hacia los demás?" },
+  { id: 31, cat: 4, titulo: "El mito de la perfección", texto: "¿Cuál es ese momento en que descubriste que ser mamá perfecta no existe — y que eso en realidad te liberó? Cuéntanos cómo esa revelación te hizo mejor mamá." },
+  { id: 32, cat: 4, titulo: "Orgullo propio", texto: "¿Qué es lo que más te enorgullece de la mamá en que te has convertido — algo que hace 10 años no habrías imaginado de ti misma?" },
+  { id: 33, cat: 4, titulo: "El sueño que evolucionó", texto: "¿Qué sueño o proyecto tuyo encontró una nueva versión gracias a la maternidad — uno que quizás hoy es más tuyo, más auténtico que el original?" },
+  { id: 34, cat: 4, titulo: "Caos hermoso", texto: "Comparte un momento de desorden absoluto en casa (paredes pintadas, juguetes regados, comida en el piso) que hoy recuerdas con profunda ternura." },
+  { id: 35, cat: 4, titulo: "Reserva de energía", texto: "Describe cómo es un día donde el cuerpo no te da más del cansancio, pero el amor por tus hijos te saca fuerzas de donde no existen." },
+  { id: 36, cat: 4, titulo: "El mundo de hoy", texto: "Criar hijos hoy es un superpoder. ¿Qué herramienta, valor o estrategia tuya ha resultado ser la más poderosa para navegar con tus hijos el mundo de hoy?" },
+  { id: 37, cat: 4, titulo: "El giro inesperado", texto: "¿Cuál es esa vez en que la maternidad te sorprendió con un giro inesperado — y resultó ser mejor de lo que cualquier plan tuyo hubiera podido ser?" },
+  { id: 38, cat: 4, titulo: "Malabarista del tiempo", texto: "¿Cómo haces espacio para ser mujer, profesional, pareja y mamá sin perder tu propia identidad en el camino?" },
+  { id: 39, cat: 4, titulo: "Abrazo sanador", texto: "Cuéntanos un día gris tuyo (por trabajo o estrés) que cambió por completo gracias a un gesto espontáneo o un abrazo de tu hijo." },
+  { id: 40, cat: 4, titulo: "Valentía extrema", texto: "¿Qué es lo más arriesgado o valiente que has hecho en tu vida con tal de defender, proteger o sacar adelante a tus hijos?" },
+  { id: 41, cat: 5, titulo: "El aroma del ayer", texto: "Si la infancia de tus hijos tuviera un olor, un sabor o una canción específica, ¿cuál sería el recuerdo que te trae a la mente?" },
+  { id: 42, cat: 5, titulo: "El regalo eterno", texto: "Si pudieras regalarle a tu hijo una sola certeza para toda su vida — algo que lleve grabado en el corazón para siempre — ¿qué sería y por qué?" },
+  { id: 43, cat: 5, titulo: "El hilo invisible", texto: "¿Cómo describirías esa conexión telepática que te hace saber que a tu hijo le pasa algo, incluso estando a kilómetros de distancia?" },
+  { id: 44, cat: 5, titulo: "El verdadero legado", texto: "¿Qué valor, principio o enseñanza no negociable esperas que tus hijos conserven de ti durante toda su vida?" },
+  { id: 45, cat: 5, titulo: "Matemática del amor", texto: "¿Cómo le explicarías a alguien que el amor no se divide cuando llega un segundo o tercer hijo, sino que el corazón se multiplica?" },
+  { id: 46, cat: 5, titulo: "El refugio eterno", texto: "Sin importar la edad que tengan, ¿por qué crees que el abrazo de mamá sigue siendo el mejor lugar del mundo para ellos?" },
+  { id: 47, cat: 5, titulo: "Tus manos de madre", texto: "Mira tus manos por un segundo. ¿Cuántas caricias, comidas preparadas, lágrimas limpiadas y abrazos estimas que han entregado a tus hijos?" },
+  { id: 48, cat: 5, titulo: "El secreto", texto: "Si hoy tu hijo pudiera leer tu mente por cinco segundos, ¿cuál es el secreto de amor más profundo que descubriría sobre lo que sientes por él?" },
+  { id: 49, cat: 5, titulo: "Cambio de órbita", texto: "¿Cómo cambió tu perspectiva del mundo, de la vida y del futuro desde el milisegundo en que supiste que ibas a ser mamá?" },
+  { id: 50, cat: 5, titulo: "Carta al universo", texto: "Termina esta frase desde el fondo de tu corazón: 'Gracias a mis hijos, hoy soy una mujer que...'" },
+];
+
+// Logo Fexpocruz — imagen real almacenada una sola vez como base64
+// Se llama con <FexpocruzLogo size={N} /> y escala automáticamente
+const LOGO_SRC = "data:image/jpeg;base64,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";
+
+const FexpocruzLogo = ({ size = 100 }) => (
+  <img
+    src={LOGO_SRC}
+    alt="FEXPOCRUZ"
+    width={size}
+    style={{ display: "block", width: size, height: "auto" }}
+  />
+);
+
+// Ornamento decorativo para el dorso de la tarjeta
+const FloralDeco = ({ color, size = 60 }) => (
+  <svg width={size} height={size} viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.15 }}>
+    <circle cx="30" cy="30" r="28" fill="none" stroke={color} strokeWidth="0.8"/>
+    <circle cx="30" cy="30" r="20" fill="none" stroke={color} strokeWidth="0.5"/>
+    <circle cx="30" cy="30" r="12" fill="none" stroke={color} strokeWidth="0.5"/>
+    <line x1="2" y1="30" x2="58" y2="30" stroke={color} strokeWidth="0.5"/>
+    <line x1="30" y1="2" x2="30" y2="58" stroke={color} strokeWidth="0.5"/>
+    <line x1="10" y1="10" x2="50" y2="50" stroke={color} strokeWidth="0.4"/>
+    <line x1="50" y1="10" x2="10" y2="50" stroke={color} strokeWidth="0.4"/>
+    <circle cx="30" cy="2" r="2" fill={color}/>
+    <circle cx="30" cy="58" r="2" fill={color}/>
+    <circle cx="2" cy="30" r="2" fill={color}/>
+    <circle cx="58" cy="30" r="2" fill={color}/>
+  </svg>
+);
+
+// Card BACK (dorso elegante — what you see before flipping)
+const CardBack = ({ cat, num }) => (
+  <div style={{
+    position: "absolute", width: "100%", height: "100%",
+    backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden",
+    borderRadius: "14px",
+    background: C.blanco,
+    border: `1px solid ${C.grisMedio}`,
+    display: "flex", flexDirection: "column",
+    alignItems: "center", justifyContent: "center",
+    overflow: "hidden",
+    boxShadow: "0 2px 16px rgba(0,0,0,0.10)",
+  }}>
+    {/* Top accent bar — tricolor */}
+    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "3px", display: "flex" }}>
+      <div style={{ flex: 1, background: C.rojo }} />
+      <div style={{ flex: 1, background: C.amarillo }} />
+      <div style={{ flex: 1, background: C.verde }} />
+    </div>
+
+    {/* Decorative corner ornament top-right */}
+    <div style={{ position: "absolute", top: "12px", right: "12px", opacity: 0.12 }}>
+      <FloralDeco color={cat.color} size={52} />
+    </div>
+    {/* Decorative corner ornament bottom-left */}
+    <div style={{ position: "absolute", bottom: "10px", left: "10px", opacity: 0.08 }}>
+      <FloralDeco color={cat.color} size={40} />
+    </div>
+
+    {/* Center: Logo real */}
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", zIndex: 1 }}>
+      <FexpocruzLogo size={90} />
+      {/* Thin divider */}
+      <div style={{ width: "40px", height: "1px", background: C.grisMedio }} />
+      {/* Category label */}
+      <div style={{
+        fontFamily: "'Century Gothic', sans-serif",
+        fontSize: "8px", letterSpacing: "3px",
+        color: cat.color, fontWeight: "bold",
+        textTransform: "uppercase",
+      }}>
+        {cat.nombre}
+      </div>
+      <div style={{
+        fontFamily: "'Century Gothic', sans-serif",
+        fontSize: "7px", letterSpacing: "2px",
+        color: C.grisMedio,
+        textTransform: "uppercase",
+      }}>
+        DÍA DE LA MADRE · 2026
+      </div>
+    </div>
+
+    {/* Card number bottom right */}
+    <div style={{
+      position: "absolute", bottom: "12px", right: "14px",
+      fontFamily: "'Century Gothic', sans-serif",
+      fontSize: "10px", color: C.grisMedio, fontWeight: "bold",
+    }}>
+      {String(num).padStart(2, "0")}
+    </div>
+
+    {/* Bottom accent bar */}
+    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "3px", display: "flex" }}>
+      <div style={{ flex: 1, background: C.verde }} />
+      <div style={{ flex: 1, background: C.amarillo }} />
+      <div style={{ flex: 1, background: C.rojo }} />
+    </div>
+  </div>
+);
+
+// Card FRONT (frente — revealed on flip)
+const CardFront = ({ tarjeta, cat }) => (
+  <div style={{
+    position: "absolute", width: "100%", height: "100%",
+    backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden",
+    transform: "rotateY(180deg)",
+    borderRadius: "14px",
+    background: C.blanco,
+    border: `1px solid ${cat.color}44`,
+    display: "flex", flexDirection: "column",
+    overflow: "hidden",
+    boxShadow: "0 2px 16px rgba(0,0,0,0.10)",
+  }}>
+    {/* Color header strip */}
+    <div style={{
+      background: cat.color,
+      padding: "12px 16px 10px",
+      flexShrink: 0,
+      position: "relative",
+      overflow: "hidden",
+    }}>
+      {/* Subtle circle deco */}
+      <div style={{
+        position: "absolute", right: "-20px", top: "-20px",
+        width: "80px", height: "80px", borderRadius: "50%",
+        background: "rgba(255,255,255,0.08)",
+      }} />
+      <div style={{
+        fontFamily: "'Century Gothic', sans-serif",
+        fontSize: "11px", fontWeight: "bold", color: "white",
+        letterSpacing: "0.5px", lineHeight: 1.3, position: "relative", zIndex: 1,
+      }}>
+        {tarjeta.titulo}
+      </div>
+      <div style={{
+        fontFamily: "'Century Gothic', sans-serif",
+        fontSize: "7.5px", color: "rgba(255,255,255,0.65)",
+        marginTop: "3px", letterSpacing: "1.5px", position: "relative", zIndex: 1,
+      }}>
+        CAT. {tarjeta.cat} · #{String(tarjeta.id).padStart(2, "0")}
+      </div>
+    </div>
+
+    {/* Body */}
+    <div style={{
+      flex: 1, padding: "14px 16px",
+      display: "flex", alignItems: "center",
+      position: "relative",
+    }}>
+      {/* Large decorative quote mark */}
+      <div style={{
+        position: "absolute", top: "4px", left: "8px",
+        fontFamily: "Georgia, serif", fontSize: "44px",
+        color: `${cat.color}14`, lineHeight: 1, userSelect: "none",
+        pointerEvents: "none",
+      }}>"</div>
+      <p style={{
+        fontFamily: "'Century Gothic', sans-serif",
+        fontSize: "11.5px", color: C.gris,
+        lineHeight: "1.65", margin: 0,
+        position: "relative", zIndex: 1,
+      }}>
+        {tarjeta.texto}
+      </p>
+    </div>
+
+    {/* Footer */}
+    <div style={{
+      padding: "7px 16px 9px",
+      borderTop: `1px solid ${C.grisClaro}`,
+      display: "flex", justifyContent: "space-between", alignItems: "center",
+      flexShrink: 0,
+    }}>
+      <div style={{
+        fontFamily: "'Century Gothic', sans-serif",
+        fontSize: "7px", color: "#bbb", letterSpacing: "1.5px",
+        textTransform: "uppercase",
+      }}>
+        Talento Humano · FEXPOCRUZ · 2026
+      </div>
+      <div style={{ display: "flex", gap: "3px" }}>
+        {[C.rojo, C.amarillo, C.verde].map((c, i) => (
+          <div key={i} style={{ width: "7px", height: "7px", borderRadius: "50%", background: c }} />
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// Single flippable card
+const Tarjeta = ({ tarjeta, cat, flipped, onClick }) => (
+  <div onClick={onClick} style={{ width: "100%", aspectRatio: "1.75", cursor: "pointer", perspective: "1000px" }}>
+    <div style={{
+      width: "100%", height: "100%", position: "relative",
+      transformStyle: "preserve-3d",
+      transition: "transform 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
+      transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+    }}>
+      <CardBack cat={cat} num={tarjeta.id} />
+      <CardFront tarjeta={tarjeta} cat={cat} />
+    </div>
+  </div>
+);
+
+// Package / box view
+const Package = ({ onOpen }) => (
+  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "360px", gap: "24px" }}>
+    {/* Box */}
+    <div style={{
+      width: "280px", height: "190px",
+      background: C.blanco,
+      borderRadius: "18px",
+      border: `1px solid ${C.grisMedio}`,
+      position: "relative", overflow: "hidden",
+      boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      cursor: "pointer",
+    }} onClick={onOpen}>
+      {/* Tricolor top bar */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", display: "flex" }}>
+        <div style={{ flex: 1, background: C.rojo }} />
+        <div style={{ flex: 1, background: C.amarillo }} />
+        <div style={{ flex: 1, background: C.verde }} />
+      </div>
+      {/* Tricolor bottom bar */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "4px", display: "flex" }}>
+        <div style={{ flex: 1, background: C.verde }} />
+        <div style={{ flex: 1, background: C.amarillo }} />
+        <div style={{ flex: 1, background: C.rojo }} />
+      </div>
+      {/* Vertical ribbon */}
+      <div style={{
+        position: "absolute", top: 0, bottom: 0, left: "50%",
+        transform: "translateX(-50%)", width: "32px",
+        display: "flex",
+      }}>
+        <div style={{ flex: 1, background: `${C.rojo}22` }} />
+        <div style={{ flex: 1, background: `${C.amarillo}22` }} />
+        <div style={{ flex: 1, background: `${C.verde}22` }} />
+      </div>
+      {/* Decorative circles */}
+      <div style={{
+        position: "absolute", top: "-30px", right: "-30px",
+        width: "100px", height: "100px", borderRadius: "50%",
+        background: `${C.verde}08`,
+      }} />
+      <div style={{
+        position: "absolute", bottom: "-20px", left: "-20px",
+        width: "80px", height: "80px", borderRadius: "50%",
+        background: `${C.rojo}08`,
+      }} />
+
+      {/* Center content */}
+      <div style={{ textAlign: "center", zIndex: 1 }}>
+        <FexpocruzLogo size={100} />
+        <div style={{
+          fontFamily: "'Century Gothic', sans-serif",
+          fontSize: "7.5px", letterSpacing: "3px",
+          color: C.gris, marginTop: "8px", textTransform: "uppercase",
+        }}>
+          50 Tarjetas · 5 Categorías
+        </div>
+        <div style={{
+          fontFamily: "'Century Gothic', sans-serif",
+          fontSize: "7px", letterSpacing: "2px",
+          color: C.grisMedio, marginTop: "4px", textTransform: "uppercase",
+        }}>
+          Día de la Madre · 2026
+        </div>
+      </div>
+    </div>
+
+    <button onClick={onOpen} style={{
+      background: C.verde, color: "white",
+      border: "none", borderRadius: "30px",
+      padding: "13px 36px",
+      fontFamily: "'Century Gothic', sans-serif",
+      fontSize: "12px", fontWeight: "bold", letterSpacing: "1.5px",
+      cursor: "pointer", textTransform: "uppercase",
+    }}>
+      Abrir mazo de tarjetas
+    </button>
+
+    <p style={{
+      fontFamily: "'Century Gothic', sans-serif",
+      fontSize: "11px", color: "#aaa",
+      textAlign: "center", maxWidth: "280px", lineHeight: "1.7", margin: 0,
+    }}>
+      Dinámica de integración emocional para el Día de la Madre — Talento Humano FEXPOCRUZ
+    </p>
+  </div>
+);
+
+
+// ═══════════════════════════════════════════════════════════════════
+// RULETA — componente visual de giro + reveal de tarjeta ganadora
+// ═══════════════════════════════════════════════════════════════════
+// ── Paleta floral elegante para los sectores de la ruleta ──────────────────────
+// Rosa antiguo, dorado suave, malva, nude, burdeos — femenino y sofisticado
+// ── Casino data ───────────────────────────────────────────────────────────────
+const CAT_META = [
+  { emoji: "😄", nombre: "Humor & frases de cajón",  sub: "Entre risas y complicidad"   },
+  { emoji: "👶", nombre: "Primeras veces",            sub: "Los recuerdos del inicio"    },
+  { emoji: "🏆", nombre: "Orgullo de madre",          sub: "Proyección y legado"         },
+  { emoji: "💪", nombre: "Desafíos & resiliencia",    sub: "Maternidad real"             },
+  { emoji: "❤️", nombre: "Amor incondicional",        sub: "Conexión emocional profunda" },
+];
+const GOLD   = "#C9A84C";
+const GOLD2  = "#8B6914";
+const GOLD_L = "#F5E6A0";
+const COL_A  = "#1A0000";
+const COL_B  = "#5C0A0A";
+
+// ── Rueda de casino real ──────────────────────────────────────────────────────
+function RuletaWheel({ spinning, winnerCatId, onSpinEnd }) {
+  const cvRef  = useRef(null);
+  const rafRef = useRef(null);
+  const angRef = useRef(0);
+  const N = categorias.length;
+  const ARC = (2 * Math.PI) / N;
+
+  function drawRing(ctx, R, r, w, col, alpha = 1) {
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, 2 * Math.PI);
+    ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke();
+    ctx.restore();
+  }
+
+  const draw = useCallback((angle) => {
+    const cv = cvRef.current; if (!cv) return;
+    const ctx = cv.getContext("2d");
+    const R = cv.width / 2;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.save(); ctx.translate(R, R);
+
+    // Fondo base
+    ctx.beginPath(); ctx.arc(0, 0, R, 0, 2 * Math.PI);
+    ctx.fillStyle = "#0D0D0D"; ctx.fill();
+
+    // Sectores
+    categorias.forEach((_, i) => {
+      const s = angle + i * ARC - Math.PI / 2;
+      const e = s + ARC;
+      const col = i % 2 === 0 ? COL_A : COL_B;
+
+      ctx.beginPath(); ctx.moveTo(0, 0);
+      ctx.arc(0, 0, R - 22, s, e); ctx.closePath();
+      ctx.fillStyle = col; ctx.fill();
+
+      // Brillo radial en borde
+      const gr = ctx.createRadialGradient(0, 0, R * 0.5, 0, 0, R - 22);
+      gr.addColorStop(0,   "rgba(0,0,0,0)");
+      gr.addColorStop(0.7, "rgba(0,0,0,0)");
+      gr.addColorStop(1,   i % 2 === 0 ? "rgba(201,168,76,0.09)" : "rgba(180,60,60,0.18)");
+      ctx.beginPath(); ctx.moveTo(0, 0);
+      ctx.arc(0, 0, R - 22, s, e); ctx.closePath();
+      ctx.fillStyle = gr; ctx.fill();
+
+      // Separador dorado
+      ctx.save(); ctx.rotate(s);
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(R - 22, 0);
+      ctx.strokeStyle = GOLD; ctx.lineWidth = 0.8; ctx.globalAlpha = 0.45; ctx.stroke();
+      ctx.restore();
+
+      // Emoji
+      const mid = s + ARC / 2;
+      const ed  = (R - 22) * 0.58;
+      ctx.save();
+      ctx.font = "20px serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.globalAlpha = 0.9;
+      ctx.fillText(CAT_META[i].emoji, Math.cos(mid) * ed, Math.sin(mid) * ed);
+      ctx.restore();
+
+      // Número estilo casino cerca del borde
+      const nd = (R - 22) * 0.84;
+      ctx.save();
+      ctx.translate(Math.cos(mid) * nd, Math.sin(mid) * nd);
+      ctx.rotate(mid + Math.PI / 2);
+      ctx.font = "bold 11px Georgia, serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillStyle = i % 2 === 0 ? "rgba(220,190,120,0.9)" : "rgba(255,220,180,0.9)";
+      ctx.globalAlpha = 0.9;
+      ctx.fillText(i + 1, 0, 0);
+      ctx.restore();
+    });
+
+    // Anillos metálicos tipo casino
+    drawRing(ctx, R, R - 2,  3, "#5C4A00", 0.7);
+    drawRing(ctx, R, R - 2,  1, GOLD,      0.9);
+    drawRing(ctx, R, R - 6,  1, GOLD2,     0.5);
+    drawRing(ctx, R, R - 10, 1, GOLD,      0.35);
+    drawRing(ctx, R, R - 22, 1.5, GOLD,    0.55);
+
+    // Bolitas de casino — 34 esferas doradas en el borde
+    const NB = 34;
+    for (let k = 0; k < NB; k++) {
+      const a  = (k / NB) * 2 * Math.PI;
+      const br = R - 13;
+      ctx.beginPath();
+      ctx.arc(Math.cos(a) * br, Math.sin(a) * br, k % 2 === 0 ? 2.5 : 1.8, 0, 2 * Math.PI);
+      ctx.fillStyle = k % 2 === 0 ? GOLD : GOLD2;
+      ctx.globalAlpha = k % 2 === 0 ? 0.9 : 0.55;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Hub central premium con degradado dorado
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.arc(0, 0, 32, 0, 2 * Math.PI);
+    ctx.fillStyle = "#1A1200"; ctx.fill();
+    ctx.restore();
+
+    const hg = ctx.createRadialGradient(-6, -6, 0, 0, 0, 32);
+    hg.addColorStop(0,   GOLD_L);
+    hg.addColorStop(0.4, GOLD);
+    hg.addColorStop(0.8, GOLD2);
+    hg.addColorStop(1,   "#3A2800");
+    ctx.beginPath(); ctx.arc(0, 0, 32, 0, 2 * Math.PI);
+    ctx.fillStyle = hg; ctx.fill();
+    drawRing(ctx, R, 32, 1.5, "#3A2800", 0.8);
+    drawRing(ctx, R, 29, 0.8, GOLD_L,    0.4);
+
+    ctx.font = "bold 17px serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillStyle = "#0A0600"; ctx.globalAlpha = 0.8;
+    ctx.fillText("✦", 0, 0);
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+  }, []);
+
+  useEffect(() => { draw(angRef.current); }, [draw]);
+
+  useEffect(() => {
+    if (!spinning) return;
+    const winIdx    = categorias.findIndex((c) => c.id === winnerCatId);
+    const sectorMid = winIdx * ARC + ARC / 2;
+    const extraSpins = (7 + Math.floor(Math.random() * 4)) * 2 * Math.PI;
+    const destAngle  = -sectorMid + extraSpins;
+    // Normalizar ángulo acumulado para que cada giro siempre dé vueltas completas
+    angRef.current = angRef.current % (2 * Math.PI);
+    const s0 = angRef.current, dA = destAngle - s0;
+    const dur = 4200; let t0 = null;
+    const ease = (t) => 1 - Math.pow(1 - t, 4);
+    const step = (ts) => {
+      if (!t0) t0 = ts;
+      const p = Math.min((ts - t0) / dur, 1);
+      angRef.current = s0 + dA * ease(p);
+      draw(angRef.current);
+      if (p < 1) { rafRef.current = requestAnimationFrame(step); }
+      else       { onSpinEnd(); }
+    };
+    rafRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [spinning, winnerCatId, draw, onSpinEnd]);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      {/* Puntero dorado estilo casino */}
+      <div style={{ marginBottom: "-2px", zIndex: 10, position: "relative" }}>
+        <svg width="28" height="28" viewBox="0 0 28 28" style={{ filter: "drop-shadow(0 3px 8px rgba(201,168,76,0.7))" }}>
+          <polygon points="14,26 4,4 24,4" fill="#C9A84C"/>
+          <polygon points="14,22 7,6 21,6" fill="#8B6914"/>
+          <circle cx="14" cy="5" r="3" fill="#C9A84C"/>
+          <circle cx="14" cy="5" r="1.5" fill="#F5E6A0"/>
+        </svg>
+      </div>
+      <canvas
+        ref={cvRef} width={340} height={340}
+        style={{
+          borderRadius: "50%", display: "block",
+          boxShadow: "0 0 0 2px #8B6914, 0 0 0 4px #C9A84C, 0 0 0 6px #8B6914, 0 0 40px rgba(201,168,76,0.28), 0 20px 70px rgba(0,0,0,0.85)",
+        }}
+      />
+    </div>
+  );
+}
+
+// ── Modal Ruleta — overlay oscuro sobre la app ────────────────────────────────
+function RuletaModal({ onClose }) {
+  const [phase,      setPhase]   = useState("idle");
+  const [winCat,     setWinCat]  = useState(null);
+  const [winCard,    setWinCard] = useState(null);
+  const [cardFlipped, setFlipped] = useState(false);
+  // IDs de tarjetas ya jugadas — no se repiten hasta agotar el mazo
+  const [usedIds,    setUsedIds] = useState([]);
+
+  const handleSpin = () => {
+    if (phase === "spinning") return;
+    const cat  = categorias[Math.floor(Math.random() * categorias.length)];
+    // Excluir tarjetas ya usadas; si todas usadas, reiniciar el pool de esa cat
+    const allPool  = tarjetas.filter((t) => t.cat === cat.id);
+    const freshPool = allPool.filter((t) => !usedIds.includes(t.id));
+    const pool = freshPool.length > 0 ? freshPool : allPool;
+    const card = pool[Math.floor(Math.random() * pool.length)];
+    setUsedIds((prev) => {
+      const next = [...prev.filter((id) => id !== card.id), card.id];
+      // Si ya usamos todas las tarjetas del juego, limpiar historial
+      return next.length >= tarjetas.length ? [] : next;
+    });
+    setWinCat(cat); setWinCard(card); setFlipped(false); setPhase("spinning");
+  };
+  const handleSpinEnd = useCallback(() => setPhase("result"), []);
+  const handleReset   = () => {
+    setPhase("idle"); setWinCat(null); setWinCard(null); setFlipped(false);
+    // NO limpiar usedIds para que el no-repetir persista entre rondas
+  };
+
+  const winIdx = winCat ? categorias.findIndex((c) => c.id === winCat.id) : -1;
+
+  return (
+    /* Overlay oscuro */
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 1000,
+      background: "rgba(0,0,0,0.82)",
+      display: "flex", alignItems: "flex-start", justifyContent: "center",
+      overflowY: "auto", padding: "0",
+    }}>
+      {/* Panel casino */}
+      <div style={{
+        background: "#0A0A0A",
+        width: "100%", minHeight: "100vh",
+        display: "flex", flexDirection: "column", alignItems: "center",
+        padding: "32px 24px 48px",
+        position: "relative",
+        fontFamily: "Georgia, serif",
+      }}>
+
+        {/* Luz de ambiente dorada arriba */}
+        <div style={{
+          position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+          width: "700px", height: "280px", pointerEvents: "none",
+          background: "radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.13) 0%, transparent 70%)",
+        }} />
+
+        {/* Botón cerrar */}
+        <button onClick={onClose} style={{
+          position: "absolute", top: "20px", right: "24px",
+          background: "transparent", border: "1px solid rgba(201,168,76,0.30)",
+          color: GOLD, borderRadius: "50%", width: "36px", height: "36px",
+          fontSize: "16px", cursor: "pointer", lineHeight: 1,
+          fontFamily: "Georgia, serif",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 10,
+        }}>✕</button>
+
+        {/* Encabezado */}
+        <div style={{ textAlign: "center", marginBottom: "28px", position: "relative", zIndex: 2 }}>
+          {/* Marca institucional — tipografía dorada sobre negro */}
+          <div style={{ marginBottom: "14px" }}>
+            <div style={{
+              fontFamily: "Georgia, serif",
+              fontSize: "10px", letterSpacing: "5px",
+              color: "rgba(240,230,208,0.5)", textTransform: "uppercase",
+              marginBottom: "4px",
+            }}>
+              Talento Humano
+            </div>
+            <div style={{
+              fontFamily: "Georgia, serif",
+              fontSize: "18px", fontWeight: "700",
+              letterSpacing: "4px", color: GOLD,
+              textTransform: "uppercase",
+            }}>
+              FEXPOCRUZ <span style={{ color: "rgba(240,230,208,0.45)", fontWeight: "400", fontSize: "13px" }}>2026</span>
+            </div>
+          </div>
+          <div style={{
+            fontSize: "9px", letterSpacing: "6px", color: GOLD,
+            textTransform: "uppercase", marginBottom: "8px", fontStyle: "italic",
+          }}>
+            ¡Tu turno, mamá!
+          </div>
+          <h2 style={{
+            fontSize: "28px", fontWeight: "700", color: "#F0E6D0",
+            letterSpacing: "2px", margin: "0 0 4px", lineHeight: 1.1,
+          }}>
+            Ruleta de Historias
+          </h2>
+          <p style={{ fontSize: "12px", color: "rgba(240,230,208,0.4)", letterSpacing: "1.5px", margin: 0, fontStyle: "italic" }}>
+            Gira y descubre qué historia vas a contar hoy
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "center", marginTop: "12px" }}>
+            <div style={{ width: "70px", height: "1px", background: `linear-gradient(90deg, transparent, ${GOLD}66)` }} />
+            <span style={{ color: GOLD, fontSize: "11px" }}>✦</span>
+            <div style={{ width: "70px", height: "1px", background: `linear-gradient(90deg, ${GOLD}66, transparent)` }} />
+          </div>
+        </div>
+
+        {/* Rueda + Leyenda */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          gap: "44px", flexWrap: "wrap", marginBottom: "28px",
+          position: "relative", zIndex: 2,
+        }}>
+          <RuletaWheel
+            spinning={phase === "spinning"}
+            winnerCatId={winCat?.id ?? 1}
+            onSpinEnd={handleSpinEnd}
+          />
+
+          {/* Leyenda elegante */}
+          <div style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(201,168,76,0.22)",
+            borderRadius: "16px", padding: "20px 22px",
+            minWidth: "230px", maxWidth: "245px",
+            boxShadow: "0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,168,76,0.08)",
+          }}>
+            <div style={{
+              fontSize: "8px", letterSpacing: "5px", color: GOLD,
+              textTransform: "uppercase", textAlign: "center",
+              marginBottom: "16px", fontStyle: "italic",
+              paddingBottom: "12px", borderBottom: "1px solid rgba(201,168,76,0.15)",
+            }}>
+              Categorías
+            </div>
+            {CAT_META.map((cm, i) => {
+              const isWin = phase === "result" && winIdx === i;
+              const isRes = phase === "result";
+              return (
+                <div key={i} style={{
+                  display: "flex", alignItems: "center", gap: "12px",
+                  padding: "9px 10px", borderRadius: "10px",
+                  marginBottom: i < 4 ? "5px" : 0,
+                  opacity: isRes ? (isWin ? 1 : 0.22) : 1,
+                  background: isWin ? "rgba(201,168,76,0.09)" : "transparent",
+                  border: `1px solid ${isWin ? "rgba(201,168,76,0.28)" : "transparent"}`,
+                  transition: "all 0.5s",
+                }}>
+                  <div style={{
+                    width: "38px", height: "38px", borderRadius: "50%", flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "19px",
+                    background: isWin ? "rgba(201,168,76,0.12)" : "rgba(255,255,255,0.05)",
+                    border: `1px solid ${isWin ? GOLD : "rgba(201,168,76,0.20)"}`,
+                    transition: "all 0.5s",
+                  }}>
+                    {cm.emoji}
+                  </div>
+                  <div>
+                    <div style={{
+                      fontSize: "12px", fontWeight: "700",
+                      color: isWin ? GOLD : "#E8DFC8",
+                      letterSpacing: "0.3px", lineHeight: "1.25",
+                      marginBottom: "2px", transition: "color 0.5s",
+                    }}>
+                      {cm.nombre}
+                    </div>
+                    <div style={{ fontSize: "9px", color: "rgba(232,223,200,0.35)", lineHeight: "1.4", fontStyle: "italic" }}>
+                      {cm.sub}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Botones */}
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginBottom: "24px", position: "relative", zIndex: 2 }}>
+          {phase !== "spinning" && (
+            <button onClick={handleSpin} style={{
+              background: `linear-gradient(135deg, ${GOLD} 0%, ${GOLD2} 45%, ${GOLD} 100%)`,
+              backgroundSize: "200%",
+              color: "#0A0600", border: "none", borderRadius: "40px",
+              padding: "14px 48px",
+              fontFamily: "Georgia, serif",
+              fontSize: "13px", fontWeight: "700",
+              letterSpacing: "2.5px", cursor: "pointer", textTransform: "uppercase",
+              boxShadow: `0 4px 20px rgba(201,168,76,0.3), inset 0 1px 0 rgba(255,255,255,0.25)`,
+            }}>
+              {phase === "idle" ? "✦  Girar la Ruleta" : "✦  Nuevo giro"}
+            </button>
+          )}
+          {phase === "result" && (
+            <button
+              onClick={() => { setUsedIds([]); setPhase("idle"); setWinCat(null); setWinCard(null); setFlipped(false); }}
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(201,168,76,0.30)",
+                color: GOLD, borderRadius: "40px",
+                padding: "14px 24px",
+                fontFamily: "Georgia, serif",
+                fontSize: "12px", fontStyle: "italic",
+                letterSpacing: "1.5px", cursor: "pointer",
+              }}>
+              ↺ Reset completo
+            </button>
+          )}
+          {phase === "result" && (
+            <button onClick={handleReset} style={{
+              background: "transparent",
+              border: "1px solid rgba(201,168,76,0.30)",
+              color: GOLD, borderRadius: "40px",
+              padding: "14px 28px",
+              fontFamily: "Georgia, serif",
+              fontSize: "12px", fontStyle: "italic",
+              letterSpacing: "1.5px", cursor: "pointer",
+            }}>
+              Reiniciar
+            </button>
+          )}
+        </div>
+
+        {phase === "spinning" && (
+          <p style={{ color: "rgba(201,168,76,0.55)", fontSize: "11px", letterSpacing: "4px", fontStyle: "italic", position: "relative", zIndex: 2 }}>
+            ✦ &nbsp; girando... &nbsp; ✦
+          </p>
+        )}
+
+        {/* Tarjeta resultado — overlay de pantalla completa sobre el modal */}
+        {phase === "result" && winCard && winCat && (
+          <div
+            onClick={() => !cardFlipped && setFlipped(true)}
+            style={{
+              position: "fixed", inset: 0, zIndex: 2000,
+              background: cardFlipped
+                ? "rgba(0,0,0,0.96)"
+                : "rgba(0,0,0,0.91)",
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center",
+              padding: "24px",
+              transition: "background 0.5s",
+              cursor: cardFlipped ? "default" : "pointer",
+            }}
+          >
+            {/* Luz de ambiente dorada arriba */}
+            <div style={{
+              position: "absolute", top: 0, left: "50%",
+              transform: "translateX(-50%)",
+              width: "800px", height: "320px", pointerEvents: "none",
+              background: `radial-gradient(ellipse at 50% 0%, ${winCat.color}22 0%, transparent 65%)`,
+            }} />
+
+            {/* Badge categoría */}
+            {!cardFlipped && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: "10px",
+                marginBottom: "24px",
+                animation: "fadeUp 0.5s ease both",
+              }}>
+                <span style={{ fontSize: "28px" }}>{CAT_META[winIdx]?.emoji}</span>
+                <div style={{ textAlign: "left" }}>
+                  <div style={{
+                    fontSize: "8px", letterSpacing: "5px",
+                    color: GOLD, textTransform: "uppercase",
+                    fontStyle: "italic", marginBottom: "3px",
+                    fontFamily: "Georgia, serif",
+                  }}>
+                    Tu categoría
+                  </div>
+                  <div style={{
+                    fontSize: "16px", fontWeight: "700",
+                    color: "#F0E6D0", letterSpacing: "0.5px",
+                    fontFamily: "Georgia, serif",
+                  }}>
+                    {winCat.nombre}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tarjeta grande — protagonista total */}
+            <div style={{
+              width: "min(680px, 94vw)",
+              perspective: "1200px",
+              flexShrink: 0,
+            }}>
+              <div style={{
+                width: "100%",
+                aspectRatio: "1.75",
+                position: "relative",
+                transformStyle: "preserve-3d",
+                transition: "transform 0.7s cubic-bezier(0.4,0,0.2,1)",
+                transform: cardFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+              }}>
+                {/* DORSO grande */}
+                <div style={{
+                  position: "absolute", width: "100%", height: "100%",
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  borderRadius: "20px",
+                  background: C.blanco,
+                  border: `2px solid ${winCat.color}44`,
+                  display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center",
+                  overflow: "hidden",
+                  boxShadow: `0 0 0 1px ${GOLD}44, 0 40px 100px rgba(0,0,0,0.8), 0 0 60px ${winCat.color}22`,
+                }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", display: "flex" }}>
+                    <div style={{ flex: 1, background: C.rojo }} />
+                    <div style={{ flex: 1, background: C.amarillo }} />
+                    <div style={{ flex: 1, background: C.verde }} />
+                  </div>
+                  {/* Logo FEXPOCRUZ centrado — protagonista en la foto */}
+                  <FexpocruzLogo size={160} />
+                  <div style={{ width: "60px", height: "1px", background: C.grisMedio, margin: "14px 0 10px" }} />
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{
+                      fontFamily: "'Century Gothic', sans-serif",
+                      fontSize: "12px", letterSpacing: "4px",
+                      color: winCat.color, fontWeight: "bold",
+                      textTransform: "uppercase", marginBottom: "6px",
+                    }}>
+                      {winCat.nombre}
+                    </div>
+                    <div style={{
+                      fontFamily: "'Century Gothic', sans-serif",
+                      fontSize: "9px", letterSpacing: "2px",
+                      color: C.grisMedio, textTransform: "uppercase",
+                    }}>
+                      Tarjeta #{String(winCard.id).padStart(2,"0")} · Día de la Madre 2026
+                    </div>
+                  </div>
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "4px", display: "flex" }}>
+                    <div style={{ flex: 1, background: C.verde }} />
+                    <div style={{ flex: 1, background: C.amarillo }} />
+                    <div style={{ flex: 1, background: C.rojo }} />
+                  </div>
+                </div>
+
+                {/* FRENTE grande — la pregunta en tamaño legible desde lejos */}
+                <div style={{
+                  position: "absolute", width: "100%", height: "100%",
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  transform: "rotateY(180deg)",
+                  borderRadius: "20px",
+                  background: C.blanco,
+                  border: `2px solid ${winCat.color}55`,
+                  display: "flex", flexDirection: "column",
+                  overflow: "hidden",
+                  boxShadow: `0 0 0 1px ${GOLD}44, 0 40px 100px rgba(0,0,0,0.8), 0 0 60px ${winCat.color}22`,
+                }}>
+                  {/* Header color */}
+                  <div style={{
+                    background: winCat.color,
+                    padding: "18px 28px 16px",
+                    flexShrink: 0,
+                    position: "relative", overflow: "hidden",
+                  }}>
+                    <div style={{
+                      position: "absolute", right: "-30px", top: "-30px",
+                      width: "120px", height: "120px", borderRadius: "50%",
+                      background: "rgba(255,255,255,0.07)",
+                    }} />
+                    <div style={{
+                      fontFamily: "'Century Gothic', sans-serif",
+                      fontSize: "18px", fontWeight: "bold",
+                      color: "white", lineHeight: 1.3,
+                      position: "relative", zIndex: 1,
+                    }}>
+                      {winCard.titulo}
+                    </div>
+                    <div style={{
+                      fontFamily: "'Century Gothic', sans-serif",
+                      fontSize: "10px", color: "rgba(255,255,255,0.65)",
+                      marginTop: "4px", letterSpacing: "1.5px",
+                      position: "relative", zIndex: 1,
+                    }}>
+                      Cat. {winCard.cat} · #{String(winCard.id).padStart(2,"0")}
+                    </div>
+                  </div>
+
+                  {/* Texto de la pregunta — grande y centrado */}
+                  <div style={{
+                    flex: 1, padding: "28px 32px",
+                    display: "flex", alignItems: "center",
+                    position: "relative",
+                  }}>
+                    <div style={{
+                      position: "absolute", top: "10px", left: "18px",
+                      fontFamily: "Georgia, serif", fontSize: "72px",
+                      color: `${winCat.color}12`, lineHeight: 1, userSelect: "none",
+                    }}>"</div>
+                    <p style={{
+                      fontFamily: "'Century Gothic', sans-serif",
+                      fontSize: "20px",
+                      color: C.gris, lineHeight: "1.7",
+                      margin: 0, position: "relative", zIndex: 1,
+                      textAlign: "center",
+                    }}>
+                      {winCard.texto}
+                    </p>
+                  </div>
+
+                  {/* Footer con logo — para que salga en la foto */}
+                  <div style={{
+                    padding: "10px 28px 12px",
+                    borderTop: `1px solid ${C.grisClaro}`,
+                    display: "flex", justifyContent: "space-between",
+                    alignItems: "center", flexShrink: 0,
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <FexpocruzLogo size={44} />
+                      <div style={{
+                        fontFamily: "'Century Gothic', sans-serif",
+                        fontSize: "9px", color: "#bbb", letterSpacing: "1.5px",
+                        borderLeft: `1px solid ${C.grisMedio}`, paddingLeft: "10px",
+                      }}>
+                        Talento Humano · FEXPOCRUZ · 2026
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: "4px" }}>
+                      {[C.rojo, C.amarillo, C.verde].map((c, i) => (
+                        <div key={i} style={{ width: "8px", height: "8px", borderRadius: "50%", background: c }} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Instrucción / botones */}
+            <div style={{ marginTop: "24px", textAlign: "center" }}>
+              {!cardFlipped ? (
+                <p style={{
+                  fontFamily: "Georgia, serif",
+                  fontSize: "12px", color: "rgba(201,168,76,0.6)",
+                  letterSpacing: "3px", fontStyle: "italic", margin: 0,
+                }}>
+                  ✦ &nbsp; toca para revelar la pregunta &nbsp; ✦
+                </p>
+              ) : (
+                <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleReset(); }}
+                    style={{
+                      background: `linear-gradient(135deg, ${GOLD} 0%, ${GOLD2} 45%, ${GOLD} 100%)`,
+                      color: "#0A0600", border: "none", borderRadius: "40px",
+                      padding: "13px 36px",
+                      fontFamily: "Georgia, serif",
+                      fontSize: "12px", fontWeight: "700",
+                      letterSpacing: "2px", cursor: "pointer",
+                      textTransform: "uppercase",
+                      boxShadow: `0 4px 20px rgba(201,168,76,0.35)`,
+                    }}
+                  >
+                    ✦ &nbsp; Girar de nuevo
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onClose(); }}
+                    style={{
+                      background: "transparent",
+                      border: "1px solid rgba(201,168,76,0.30)",
+                      color: GOLD, borderRadius: "40px",
+                      padding: "13px 28px",
+                      fontFamily: "Georgia, serif",
+                      fontSize: "12px", fontStyle: "italic",
+                      letterSpacing: "1.5px", cursor: "pointer",
+                    }}
+                  >
+                    Volver a la app
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+export default function App() {
+  const [view, setView] = useState("package");
+  const [selectedCat, setSelectedCat] = useState(null);
+  const [flipped, setFlipped] = useState({});
+  const [ruletaOpen, setRuletaOpen] = useState(false);
+
+  const catInfo = categorias.find((c) => c.id === selectedCat);
+  const visibleCards = view === "all"
+    ? tarjetas
+    : tarjetas.filter((t) => t.cat === selectedCat);
+
+  const handleFlipAll = () => {
+    const allOn = visibleCards.every((t) => flipped[t.id]);
+    const next = {};
+    visibleCards.forEach((t) => { next[t.id] = !allOn; });
+    setFlipped((p) => ({ ...p, ...next }));
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F8F8F6", fontFamily: "'Century Gothic', 'Trebuchet MS', sans-serif" }}>
+
+      {/* HEADER */}
+      <div style={{
+        background: C.blanco,
+        borderBottom: `1px solid ${C.grisMedio}`,
+        padding: "14px 28px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <FexpocruzLogo size={56} />
+          <div style={{ borderLeft: `1px solid ${C.grisMedio}`, paddingLeft: "14px" }}>
+            <div style={{ fontFamily: "'Century Gothic', sans-serif", fontSize: "11px", color: C.gris, fontWeight: "bold", letterSpacing: "1px" }}>
+              TALENTO HUMANO
+            </div>
+            <div style={{ fontFamily: "'Century Gothic', sans-serif", fontSize: "9px", color: C.grisMedio, letterSpacing: "1px", marginTop: "2px" }}>
+              DÍA DE LA MADRE · 2026
+            </div>
+          </div>
+        </div>
+
+        {true && (
+          <div style={{ display: "flex", gap: "8px" }}>
+            {view === "cards" && (
+              <button onClick={() => setView("categories")} style={{
+                background: "transparent", border: `1px solid ${C.grisMedio}`,
+                color: C.gris, borderRadius: "20px", padding: "6px 16px",
+                fontSize: "11px", cursor: "pointer", letterSpacing: "0.5px",
+                fontFamily: "'Century Gothic', sans-serif",
+              }}>
+                ← Categorías
+              </button>
+            )}
+            <button onClick={() => setRuletaOpen(true)} style={{
+              background: "transparent",
+              border: `1px solid ${C.grisMedio}`,
+              color: C.gris,
+              borderRadius: "20px", padding: "6px 16px",
+              fontSize: "11px", cursor: "pointer", letterSpacing: "0.5px",
+              fontFamily: "'Century Gothic', sans-serif",
+            }}>
+              🎯 Ruleta
+            </button>
+            <button onClick={() => setView("package")} style={{
+              background: "transparent", border: `1px solid ${C.grisMedio}`,
+              color: C.gris, borderRadius: "20px", padding: "6px 16px",
+              fontSize: "11px", cursor: "pointer", letterSpacing: "0.5px",
+              fontFamily: "'Century Gothic', sans-serif",
+            }}>
+              Mazo
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* TRICOLOR LINE */}
+      <div style={{ height: "3px", display: "flex" }}>
+        <div style={{ flex: 1, background: C.rojo }} />
+        <div style={{ flex: 1, background: C.amarillo }} />
+        <div style={{ flex: 1, background: C.verde }} />
+      </div>
+
+      {/* CONTENT */}
+      <div style={{ padding: "36px 28px", maxWidth: "940px", margin: "0 auto" }}>
+
+        {/* PACKAGE */}
+        {view === "package" && <Package onOpen={() => setView("categories")} />}
+
+        {/* CATEGORIES */}
+        {view === "categories" && (
+          <div>
+            <div style={{ textAlign: "center", marginBottom: "36px" }}>
+              <div style={{
+                fontFamily: "'Century Gothic', sans-serif",
+                fontSize: "10px", letterSpacing: "4px", color: C.verde,
+                textTransform: "uppercase", marginBottom: "10px",
+              }}>
+                Selecciona una categoría
+              </div>
+              <h1 style={{
+                fontFamily: "'Century Gothic', sans-serif",
+                fontSize: "22px", fontWeight: "bold",
+                color: C.gris, letterSpacing: "1px", margin: "0 0 6px",
+              }}>
+                Mazo de Tarjetas
+              </h1>
+              <p style={{ color: "#aaa", fontSize: "12px", margin: 0 }}>
+                5 categorías · 10 tarjetas cada una · 50 tarjetas en total
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
+              {categorias.map((cat) => (
+                <div
+                  key={cat.id}
+                  onClick={() => { setSelectedCat(cat.id); setView("cards"); setFlipped({}); }}
+                  style={{
+                    background: C.blanco, borderRadius: "14px",
+                    overflow: "hidden", cursor: "pointer",
+                    border: `1px solid ${C.grisMedio}`,
+                    transition: "transform 0.2s, box-shadow 0.2s",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(0,0,0,0.10)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                >
+                  {/* Color top bar */}
+                  <div style={{ height: "4px", background: cat.color }} />
+                  <div style={{ padding: "20px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                      <div style={{
+                        width: "32px", height: "32px", borderRadius: "50%",
+                        background: `${cat.color}15`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        <i className={`ti ${cat.icono}`} style={{ fontSize: "16px", color: cat.color }} aria-hidden="true" />
+                      </div>
+                      <span style={{
+                        fontFamily: "'Century Gothic', sans-serif",
+                        fontSize: "9px", color: cat.color,
+                        letterSpacing: "2px", fontWeight: "bold", textTransform: "uppercase",
+                      }}>
+                        Categoría {cat.id}
+                      </span>
+                    </div>
+                    <div style={{
+                      fontFamily: "'Century Gothic', sans-serif",
+                      fontWeight: "bold", color: C.gris,
+                      fontSize: "13px", lineHeight: "1.4", marginBottom: "6px",
+                    }}>
+                      {cat.nombre}
+                    </div>
+                    <div style={{ color: "#aaa", fontSize: "11px", lineHeight: "1.5" }}>
+                      {cat.subtitulo}
+                    </div>
+                    <div style={{
+                      marginTop: "14px", color: cat.color,
+                      fontSize: "11px", fontWeight: "bold", letterSpacing: "0.5px",
+                    }}>
+                      10 tarjetas →
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: "28px" }}>
+              <button onClick={() => { setSelectedCat(null); setView("all"); setFlipped({}); }} style={{
+                background: "transparent",
+                border: `1px solid ${C.gris}`,
+                color: C.gris, borderRadius: "30px",
+                padding: "12px 30px",
+                fontFamily: "'Century Gothic', sans-serif",
+                fontSize: "11px", cursor: "pointer",
+                letterSpacing: "1.5px", textTransform: "uppercase", fontWeight: "bold",
+              }}>
+                Ver las 50 tarjetas completas
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* CARDS */}
+        {(view === "cards" || view === "all") && (
+          <div>
+            {/* Section header */}
+            <div style={{
+              display: "flex", alignItems: "flex-start",
+              justifyContent: "space-between",
+              marginBottom: "28px", flexWrap: "wrap", gap: "14px",
+            }}>
+              <div>
+                <div style={{
+                  fontFamily: "'Century Gothic', sans-serif",
+                  fontSize: "9px", letterSpacing: "3px",
+                  color: catInfo ? catInfo.color : C.verde,
+                  textTransform: "uppercase", marginBottom: "6px",
+                }}>
+                  {catInfo ? `Categoría ${catInfo.id}` : "Colección completa"}
+                </div>
+                <h2 style={{
+                  fontFamily: "'Century Gothic', sans-serif",
+                  color: C.gris, fontSize: "18px",
+                  fontWeight: "bold", margin: "0 0 4px", letterSpacing: "0.5px",
+                }}>
+                  {catInfo ? catInfo.nombre : "Las 50 tarjetas"}
+                </h2>
+                <p style={{ color: "#aaa", fontSize: "11px", margin: 0 }}>
+                  Toca cada tarjeta para revelar la pregunta
+                </p>
+              </div>
+              <button onClick={handleFlipAll} style={{
+                background: catInfo ? catInfo.color : C.gris,
+                color: "white", border: "none", borderRadius: "24px",
+                padding: "10px 22px",
+                fontFamily: "'Century Gothic', sans-serif",
+                fontSize: "11px", cursor: "pointer",
+                fontWeight: "bold", letterSpacing: "0.5px",
+                textTransform: "uppercase",
+              }}>
+                Voltear todas
+              </button>
+            </div>
+
+            {/* Cards grid */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
+              {visibleCards.map((t) => {
+                const cat = categorias.find((c) => c.id === t.cat);
+                return (
+                  <Tarjeta
+                    key={t.id}
+                    tarjeta={t}
+                    cat={cat}
+                    flipped={!!flipped[t.id]}
+                    onClick={() => setFlipped((p) => ({ ...p, [t.id]: !p[t.id] }))}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* MODAL RULETA */}
+      {ruletaOpen && <RuletaModal onClose={() => setRuletaOpen(false)} />}
+
+      {/* FOOTER */}
+      <div style={{
+        borderTop: `1px solid ${C.grisMedio}`,
+        background: C.blanco,
+        textAlign: "center", padding: "20px",
+        marginTop: "40px",
+      }}>
+        <FexpocruzLogo size={50} />
+        <div style={{
+          fontFamily: "'Century Gothic', sans-serif",
+          fontSize: "9px", color: "#ccc",
+          letterSpacing: "2px", marginTop: "10px", textTransform: "uppercase",
+        }}>
+          Talento Humano · FEXPOCRUZ · Día de la Madre 2026
+        </div>
+        <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginTop: "10px" }}>
+          {[C.rojo, C.amarillo, C.verde].map((c, i) => (
+            <div key={i} style={{ width: "24px", height: "2px", background: c, borderRadius: "1px" }} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
