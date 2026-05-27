@@ -797,18 +797,18 @@ function RuletaModal({ onClose }) {
           </p>
         )}
 
-        {/* Tarjeta resultado — overlay de pantalla completa sobre el modal */}
+        {/* Tarjeta resultado — MODO PROYECCIÓN: pantalla completa adaptativa */}
         {phase === "result" && winCard && winCat && (
           <div
             onClick={() => !cardFlipped && setFlipped(true)}
             style={{
               position: "fixed", inset: 0, zIndex: 2000,
               background: cardFlipped
-                ? "rgba(0,0,0,0.96)"
-                : "rgba(0,0,0,0.91)",
+                ? "rgba(0,0,0,0.97)"
+                : "rgba(0,0,0,0.93)",
               display: "flex", flexDirection: "column",
               alignItems: "center", justifyContent: "center",
-              padding: "24px",
+              padding: "2vmin",
               transition: "background 0.5s",
               cursor: cardFlipped ? "default" : "pointer",
             }}
@@ -817,21 +817,46 @@ function RuletaModal({ onClose }) {
             <div style={{
               position: "absolute", top: 0, left: "50%",
               transform: "translateX(-50%)",
-              width: "800px", height: "320px", pointerEvents: "none",
+              width: "1100px", maxWidth: "120vw", height: "40vh",
+              pointerEvents: "none",
               background: `radial-gradient(ellipse at 50% 0%, ${winCat.color}22 0%, transparent 65%)`,
             }} />
 
-            {/* Badge categoría */}
+            {/* Botón pantalla completa real del navegador */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const el = document.documentElement;
+                if (!document.fullscreenElement) {
+                  (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+                } else {
+                  (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+                }
+              }}
+              title="Pantalla completa"
+              style={{
+                position: "absolute", top: "2vmin", right: "2vmin", zIndex: 5,
+                background: "rgba(0,0,0,0.4)",
+                border: "1px solid rgba(201,168,76,0.30)",
+                color: GOLD, borderRadius: "50%",
+                width: "clamp(36px,3.4vw,52px)", height: "clamp(36px,3.4vw,52px)",
+                fontSize: "clamp(16px,1.6vw,24px)", cursor: "pointer",
+                lineHeight: 1, fontFamily: "Georgia, serif",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >⛶</button>
+
+            {/* Badge categoría — adaptativo */}
             {!cardFlipped && (
               <div style={{
-                display: "flex", alignItems: "center", gap: "10px",
-                marginBottom: "24px",
+                display: "flex", alignItems: "center", gap: "clamp(8px,1vw,16px)",
+                marginBottom: "clamp(16px,2.2vh,32px)",
                 animation: "fadeUp 0.5s ease both",
               }}>
-                <span style={{ fontSize: "28px" }}>{CAT_META[winIdx]?.emoji}</span>
+                <span style={{ fontSize: "clamp(28px,3.4vw,56px)" }}>{CAT_META[winIdx]?.emoji}</span>
                 <div style={{ textAlign: "left" }}>
                   <div style={{
-                    fontSize: "8px", letterSpacing: "5px",
+                    fontSize: "clamp(9px,0.95vw,16px)", letterSpacing: "5px",
                     color: GOLD, textTransform: "uppercase",
                     fontStyle: "italic", marginBottom: "3px",
                     fontFamily: "Georgia, serif",
@@ -839,7 +864,7 @@ function RuletaModal({ onClose }) {
                     Tu categoría
                   </div>
                   <div style={{
-                    fontSize: "16px", fontWeight: "700",
+                    fontSize: "clamp(18px,1.9vw,34px)", fontWeight: "700",
                     color: "#F0E6D0", letterSpacing: "0.5px",
                     fontFamily: "Georgia, serif",
                   }}>
@@ -849,10 +874,10 @@ function RuletaModal({ onClose }) {
               </div>
             )}
 
-            {/* Tarjeta grande — protagonista total */}
+            {/* Tarjeta — protagonista total, adaptativa a la pantalla */}
             <div style={{
-              width: "min(680px, 94vw)",
-              perspective: "1200px",
+              width: "min(96vw, calc(86vh * 1.75))",
+              perspective: "1600px",
               flexShrink: 0,
             }}>
               <div style={{
@@ -863,12 +888,12 @@ function RuletaModal({ onClose }) {
                 transition: "transform 0.7s cubic-bezier(0.4,0,0.2,1)",
                 transform: cardFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
               }}>
-                {/* DORSO grande */}
+                {/* DORSO — adaptativo */}
                 <div style={{
                   position: "absolute", width: "100%", height: "100%",
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
-                  borderRadius: "20px",
+                  borderRadius: "clamp(16px,1.6vw,28px)",
                   background: C.blanco,
                   border: `2px solid ${winCat.color}44`,
                   display: "flex", flexDirection: "column",
@@ -876,123 +901,127 @@ function RuletaModal({ onClose }) {
                   overflow: "hidden",
                   boxShadow: `0 0 0 1px ${GOLD}44, 0 40px 100px rgba(0,0,0,0.8), 0 0 60px ${winCat.color}22`,
                 }}>
-                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", display: "flex" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "0.5vh", minHeight: "4px", display: "flex" }}>
                     <div style={{ flex: 1, background: C.rojo }} />
                     <div style={{ flex: 1, background: C.amarillo }} />
                     <div style={{ flex: 1, background: C.verde }} />
                   </div>
                   {/* Logo FEXPOCRUZ centrado — protagonista en la foto */}
-                  <FexpocruzLogo size={160} />
-                  <div style={{ width: "60px", height: "1px", background: C.grisMedio, margin: "14px 0 10px" }} />
+                  <div style={{ width: "clamp(160px,22vw,360px)" }}>
+                    <FexpocruzLogo size={320} />
+                  </div>
+                  <div style={{ width: "clamp(60px,7vw,120px)", height: "2px", background: C.grisMedio, margin: "clamp(14px,2vh,32px) 0 clamp(10px,1.4vh,22px)" }} />
                   <div style={{ textAlign: "center" }}>
                     <div style={{
                       fontFamily: "'Century Gothic', sans-serif",
-                      fontSize: "12px", letterSpacing: "4px",
+                      fontSize: "clamp(12px,1.5vw,28px)", letterSpacing: "clamp(4px,0.4vw,8px)",
                       color: winCat.color, fontWeight: "bold",
-                      textTransform: "uppercase", marginBottom: "6px",
+                      textTransform: "uppercase", marginBottom: "clamp(6px,0.9vh,14px)",
                     }}>
                       {winCat.nombre}
                     </div>
                     <div style={{
                       fontFamily: "'Century Gothic', sans-serif",
-                      fontSize: "9px", letterSpacing: "2px",
+                      fontSize: "clamp(9px,1vw,18px)", letterSpacing: "2px",
                       color: C.grisMedio, textTransform: "uppercase",
                     }}>
                       Tarjeta #{String(winCard.id).padStart(2,"0")} · Día de la Madre 2026
                     </div>
                   </div>
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "4px", display: "flex" }}>
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "0.5vh", minHeight: "4px", display: "flex" }}>
                     <div style={{ flex: 1, background: C.verde }} />
                     <div style={{ flex: 1, background: C.amarillo }} />
                     <div style={{ flex: 1, background: C.rojo }} />
                   </div>
                 </div>
 
-                {/* FRENTE grande — la pregunta en tamaño legible desde lejos */}
+                {/* FRENTE — la pregunta protagonista, legible desde lejos */}
                 <div style={{
                   position: "absolute", width: "100%", height: "100%",
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
                   transform: "rotateY(180deg)",
-                  borderRadius: "20px",
+                  borderRadius: "clamp(16px,1.6vw,28px)",
                   background: C.blanco,
                   border: `2px solid ${winCat.color}55`,
                   display: "flex", flexDirection: "column",
                   overflow: "hidden",
                   boxShadow: `0 0 0 1px ${GOLD}44, 0 40px 100px rgba(0,0,0,0.8), 0 0 60px ${winCat.color}22`,
                 }}>
-                  {/* Header color */}
+                  {/* Header color — banda con el título */}
                   <div style={{
                     background: winCat.color,
-                    padding: "18px 28px 16px",
+                    padding: "clamp(16px,2.4vh,36px) clamp(24px,3vw,56px) clamp(14px,2vh,30px)",
                     flexShrink: 0,
                     position: "relative", overflow: "hidden",
                   }}>
                     <div style={{
-                      position: "absolute", right: "-30px", top: "-30px",
-                      width: "120px", height: "120px", borderRadius: "50%",
+                      position: "absolute", right: "-2vw", top: "-3vw",
+                      width: "16vw", height: "16vw", borderRadius: "50%",
                       background: "rgba(255,255,255,0.07)",
                     }} />
                     <div style={{
                       fontFamily: "'Century Gothic', sans-serif",
-                      fontSize: "18px", fontWeight: "bold",
-                      color: "white", lineHeight: 1.3,
+                      fontSize: "clamp(22px,3vw,60px)", fontWeight: "bold",
+                      color: "white", lineHeight: 1.2,
                       position: "relative", zIndex: 1,
                     }}>
                       {winCard.titulo}
                     </div>
                     <div style={{
                       fontFamily: "'Century Gothic', sans-serif",
-                      fontSize: "10px", color: "rgba(255,255,255,0.65)",
-                      marginTop: "4px", letterSpacing: "1.5px",
+                      fontSize: "clamp(10px,1.1vw,20px)", color: "rgba(255,255,255,0.7)",
+                      marginTop: "clamp(4px,0.6vh,10px)", letterSpacing: "1.5px",
                       position: "relative", zIndex: 1,
                     }}>
                       Cat. {winCard.cat} · #{String(winCard.id).padStart(2,"0")}
                     </div>
                   </div>
 
-                  {/* Texto de la pregunta — grande y centrado */}
+                  {/* Texto de la pregunta — grande, centrado, protagonista */}
                   <div style={{
-                    flex: 1, padding: "28px 32px",
+                    flex: 1, padding: "clamp(20px,3vh,52px) clamp(28px,4vw,80px)",
                     display: "flex", alignItems: "center",
                     position: "relative",
                   }}>
                     <div style={{
-                      position: "absolute", top: "10px", left: "18px",
-                      fontFamily: "Georgia, serif", fontSize: "72px",
+                      position: "absolute", top: "0.8vh", left: "1.6vw",
+                      fontFamily: "Georgia, serif", fontSize: "clamp(72px,9vw,180px)",
                       color: `${winCat.color}12`, lineHeight: 1, userSelect: "none",
                     }}>"</div>
                     <p style={{
                       fontFamily: "'Century Gothic', sans-serif",
-                      fontSize: "20px",
-                      color: C.gris, lineHeight: "1.7",
+                      fontSize: "clamp(20px,3.4vw,68px)",
+                      color: C.gris, lineHeight: "1.5",
                       margin: 0, position: "relative", zIndex: 1,
-                      textAlign: "center",
+                      textAlign: "center", fontWeight: "500",
                     }}>
                       {winCard.texto}
                     </p>
                   </div>
 
-                  {/* Footer con logo — para que salga en la foto */}
+                  {/* Footer con logo — discreto, no compite con la pregunta */}
                   <div style={{
-                    padding: "10px 28px 12px",
+                    padding: "clamp(8px,1.2vh,16px) clamp(24px,3vw,56px) clamp(10px,1.4vh,18px)",
                     borderTop: `1px solid ${C.grisClaro}`,
                     display: "flex", justifyContent: "space-between",
                     alignItems: "center", flexShrink: 0,
                   }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <FexpocruzLogo size={44} />
+                    <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px,1vw,16px)" }}>
+                      <div style={{ width: "clamp(44px,4.5vw,80px)" }}>
+                        <FexpocruzLogo size={72} />
+                      </div>
                       <div style={{
                         fontFamily: "'Century Gothic', sans-serif",
-                        fontSize: "9px", color: "#bbb", letterSpacing: "1.5px",
-                        borderLeft: `1px solid ${C.grisMedio}`, paddingLeft: "10px",
+                        fontSize: "clamp(9px,0.9vw,15px)", color: "#bbb", letterSpacing: "1.5px",
+                        borderLeft: `1px solid ${C.grisMedio}`, paddingLeft: "clamp(10px,1vw,16px)",
                       }}>
                         Talento Humano · {window.__empresaNombre} · 2026
                       </div>
                     </div>
-                    <div style={{ display: "flex", gap: "4px" }}>
+                    <div style={{ display: "flex", gap: "clamp(4px,0.5vw,8px)" }}>
                       {[C.rojo, C.amarillo, C.verde].map((c, i) => (
-                        <div key={i} style={{ width: "8px", height: "8px", borderRadius: "50%", background: c }} />
+                        <div key={i} style={{ width: "clamp(8px,0.9vw,14px)", height: "clamp(8px,0.9vw,14px)", borderRadius: "50%", background: c }} />
                       ))}
                     </div>
                   </div>
@@ -1000,26 +1029,26 @@ function RuletaModal({ onClose }) {
               </div>
             </div>
 
-            {/* Instrucción / botones */}
-            <div style={{ marginTop: "24px", textAlign: "center" }}>
+            {/* Instrucción / botones — adaptativos */}
+            <div style={{ marginTop: "clamp(16px,2.4vh,36px)", textAlign: "center" }}>
               {!cardFlipped ? (
                 <p style={{
                   fontFamily: "Georgia, serif",
-                  fontSize: "12px", color: "rgba(201,168,76,0.6)",
+                  fontSize: "clamp(12px,1.3vw,22px)", color: "rgba(201,168,76,0.6)",
                   letterSpacing: "3px", fontStyle: "italic", margin: 0,
                 }}>
                   ✦ &nbsp; toca para revelar la pregunta &nbsp; ✦
                 </p>
               ) : (
-                <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: "clamp(10px,1.2vw,18px)", justifyContent: "center", flexWrap: "wrap" }}>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleReset(); }}
                     style={{
                       background: `linear-gradient(135deg, ${GOLD} 0%, ${GOLD2} 45%, ${GOLD} 100%)`,
                       color: "#0A0600", border: "none", borderRadius: "40px",
-                      padding: "13px 36px",
+                      padding: "clamp(13px,1.6vh,22px) clamp(36px,4vw,64px)",
                       fontFamily: "Georgia, serif",
-                      fontSize: "12px", fontWeight: "700",
+                      fontSize: "clamp(12px,1.3vw,22px)", fontWeight: "700",
                       letterSpacing: "2px", cursor: "pointer",
                       textTransform: "uppercase",
                       boxShadow: `0 4px 20px rgba(201,168,76,0.35)`,
@@ -1033,9 +1062,9 @@ function RuletaModal({ onClose }) {
                       background: "transparent",
                       border: "1px solid rgba(201,168,76,0.30)",
                       color: GOLD, borderRadius: "40px",
-                      padding: "13px 28px",
+                      padding: "clamp(13px,1.6vh,22px) clamp(28px,3vw,48px)",
                       fontFamily: "Georgia, serif",
-                      fontSize: "12px", fontStyle: "italic",
+                      fontSize: "clamp(12px,1.3vw,22px)", fontStyle: "italic",
                       letterSpacing: "1.5px", cursor: "pointer",
                     }}
                   >
